@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener(
                                 // Call Gemini API and send the response
                                 fetchSummary(pageContent)
                                     .then(summary => sendResponse({ summary: summary }))
-                                    .catch(error => sendResponse({ error: error }));
+                                    .catch(error => sendResponse({ error: error.message }));
                             } else {
                                 sendResponse({ error: "Failed to get page content" });
                             }
@@ -90,6 +90,9 @@ async function fetchSummary(text) {
         });
 
         if (!response.ok) {
+            if (response.status === 400) {
+                throw new Error("Invalid apiKey to access the Gemini API.");
+            }
             throw new Error(`Gemini API error: ${response.status} - ${response.statusText}`);
         }
 
