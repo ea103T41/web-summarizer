@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "Web Summarizer",
+    "version": "1.0",
+    "description": "Summarizes webpage content using Gemini API",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "sidePanel",
+        "storage",
+        "contextMenus"
+    ],
+    "action": {
+        "default_popup": ""
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    }
+}
