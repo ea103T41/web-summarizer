@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const summaryList = document.createElement('ul');
                     const summaryPoints = response.summary.split('\n'); // Assuming Gemini API returns each point on a new line
                     summaryPoints.forEach(point => {
+                        if (!point) return; // Skip empty points
                         const listItem = document.createElement('li');
-                        listItem.textContent = point;
+                        listItem.textContent = point.replace(/^\*\s*/, '');
                         summaryList.appendChild(listItem);
                     });
                     summaryDiv.appendChild(summaryList);

@@ -1,6 +1,7 @@
 #summary ul {
     list-style-type: disc;
-    margin-left: 20px;
+    margin-left: 0px;
+    padding-left: 20px;
 }
 
 #error {

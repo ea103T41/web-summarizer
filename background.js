@@ -23,24 +23,31 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.message === "get_page_content") {
-            // Execute script to extract text content directly from the page
-            chrome.scripting.executeScript({
-                target: { tabId: sender.tab.id },
-                function: () => {
-                    return document.body.innerText; // Simple example, refine for better extraction
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) { // Query for active tab
+                if (tabs && tabs[0] && tabs[0].id) {
+                    const activeTabId = tabs[0].id; // Get the active tab ID
+                    // Execute script to extract text content directly from the page
+                    chrome.scripting.executeScript({
+                        target: { tabId: activeTabId }, // Use the queried active tab ID
+                        function: () => {
+                            return document.body.innerText;
+                        }
+                    },
+                        (results) => {
+                            if (results && results[0] && results[0].result) {
+                                const pageContent = results[0].result;
+                                // Call Gemini API and send the response
+                                fetchSummary(pageContent)
+                                    .then(summary => sendResponse({ summary: summary }))
+                                    .catch(error => sendResponse({ error: error }));
+                            } else {
+                                sendResponse({ error: "Failed to get page content" });
+                            }
+                        });
+                } else {
+                    sendResponse({ error: "Could not get active tab ID." });
                 }
-            },
-                (results) => {
-                    if (results && results[0] && results[0].result) {
-                        const pageContent = results[0].result;
-                        // Call Gemini API and send the response
-                        fetchSummary(pageContent)
-                            .then(summary => sendResponse({ summary: summary }))
-                            .catch(error => sendResponse({ error: error }));
-                    } else {
-                        sendResponse({ error: "Failed to get page content" });
-                    }
-                });
+            });
             return true;  // Important!  Indicates you want to send a response asynchronously
         }
     }
@@ -60,7 +67,7 @@ async function fetchSummary(text) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: `Summarize the following content in bullet points:\n${text}` }] }],
+                contents: [{ parts: [{ text: `請用中文重點摘要以下內容，每一項摘要一行，用純文字格式：\n${text}` }] }],
                 safetySettings: [
                     {
                         "category": "HARM_CATEGORY_HARASSMENT",
